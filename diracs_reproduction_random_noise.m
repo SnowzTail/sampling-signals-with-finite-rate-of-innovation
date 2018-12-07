@@ -1,18 +1,27 @@
 clear; close;
+% number of diracs
+nDiracs = 2;
+% number of moments
+nMoments = 5;
 % max degree of polynomials
-nDegMax = 3;
+% nDegMax = ceil(2 * nDiracs - 1);
+nDegMax = nMoments - 1;
 % kernels of finite support
 lSignal = 2048;
 % sampling period
 tSample = 64;
 % max amplitue
 weightMax = 32;
-% number of iterations
-iter = 6;
 % number of shifts
 nShifts = 31;
+% number of iterations
+iter = 6;
 % time of sampling points
 t = 0: 1 / tSample : (lSignal - 1) / tSample;
+% variance
+sigma = [1e1; 1e0; 1e-1];
+% noise
+noise = sigma * randn(1, nDegMax + 1);
 poly = zeros(nDegMax + 1, lSignal);
 coeffs = zeros(nDegMax + 1, nShifts + 1);
 phi = zeros(1, lSignal);
@@ -35,19 +44,21 @@ for iDeg = 0: nDegMax
     % coefficients of corresponding kernels
     coeffs(iDeg + 1, :) = dot(repmat(poly(iDeg + 1, :), nShifts + 1, 1), phiSet, 2).' ./ tSample;
 end
-% reproduce polynomials with coefficients
-polyRep = coeffs * phiSet;
-figure;
+%% Diracs stream generation
+signal = zeros(1, lSignal);
+tau = zeros(1, nDegMax + 1);
+locations = sort(randperm(lSignal, nDiracs)) / tSample;
+weights = randperm(weightMax, nDiracs);
+signal(locations * tSample) = weights;
+samples = signal * phiSet';
 for iDeg = 0: nDegMax
-    subplot((nDegMax + 1) / 2, 2, iDeg + 1);
-    plot(t, poly(iDeg + 1, :), 'b');
-    hold on;
-    plot(t, polyRep(iDeg + 1, :), 'r');
-    hold on;
-    plot(t, phiSet' .* coeffs(iDeg + 1, :), 'k:')
-    xlabel('Time');
-    ylabel('Amplitude');
-    legend(sprintf('Original Polynomial t^%d', iDeg), 'Reproduced by dB4', 'Shifted Kernels', 'location', 'northwest');
-    title(['Polynomial of Degree ', num2str(iDeg)]);
+    tau(1, iDeg + 1) = dot(coeffs(iDeg + 1, :), samples);
 end
-% suptitle(['Reproduction of polynomials of maximum degree ' nDegMax ' using Daubechies wavelets with ' nDegMax + 1 ' vanishing moments']);
+tauNoisy = tau + noise(1, :);
+tauMatrix = zeros(nMoments - nDiracs, nDiracs + 1);
+for iDirac = 1: nMoments - nDiracs
+    tauMatrix(iDirac, :) = flip(tauNoisy(iDirac: iDirac + nDiracs));
+end
+[u, lambda, v] = svd(tauMatrix);
+h = v(:, end);
+norm(h)

@@ -6,13 +6,13 @@ lSignal = 2048;
 % sampling period
 tSample = 64;
 % max amplitue
-ampMax = 32;
+weightMax = 32;
 % number of iterations
 iter = 6;
 % number of shifts
-nShifts = 32;
+nShifts = 31;
 % time of sampling points
-t = 1 / tSample: 1 / tSample : nShifts;
+t = 0: 1 / tSample : (lSignal - 1) / tSample;
 poly = zeros(nDegMax + 1, lSignal);
 coeffs = zeros(nDegMax + 1, nShifts + 1);
 phi = zeros(1, lSignal);
@@ -38,22 +38,21 @@ for iDeg = 0: nDegMax
     % all possible polynomials determined by time, max degree nDegMax
     poly(iDeg + 1, :) = t .^ iDeg;
     % coefficients of corresponding kernels
-    coeffs(iDeg + 1, :) = dot(repmat(poly(iDeg + 1, :), nShifts + 1, 1), phiTildeSet, 2).';
+    coeffs(iDeg + 1, :) = dot(repmat(poly(iDeg + 1, :), nShifts + 1, 1), phiTildeSet, 2).' ./ tSample;
 end
 % reproduce polynomials with coefficients
-polyRep = coeffs * phiSet ./ tSample;
+polyRep = coeffs * phiSet;
 figure;
 for iDeg = 0: nDegMax
     subplot((nDegMax + 1) / 2, 2, iDeg + 1);
-    plot(t, poly(iDeg + 1, :), 'k');
-    xlabel('Time');
-    ylabel('Amplitude');
+    plot(t, poly(iDeg + 1, :), 'b');
     hold on;
     plot(t, polyRep(iDeg + 1, :), 'r');
+    hold on;
+    plot(t, phiSet' .* coeffs(iDeg + 1, :), 'k:')
     xlabel('Time');
     ylabel('Amplitude');
-    legend('Original', 'Cubic B-spline', 'location', 'northwest');
-    title(['Polynomial of degree ', num2str(iDeg)]);
+    legend(sprintf('Original Polynomial t^%d', iDeg), 'Reproduced by Cubic B-spline', 'Shifted Kernels', 'location', 'northwest');
+    title(['Polynomial of Degree ', num2str(iDeg)]);
 end
-% suptitle(['Reproduction of polynomials of maximum degree ' nDegMax ' using Daubechies wavelets with ' nDegMax + 1 ' vanishing moments']);
-flag = 1;
+% suptitle(['Reproduction of polynomials of maximum degree ' nDegMax ' using Cubic B-spline']);

@@ -8,7 +8,7 @@ nDiracs = 2;
 tauMatrixLeft = zeros(nDegMax - nDiracs + 1, nDiracs);
 tauMatrixRight = zeros(nDegMax - nDiracs + 1, 1);
 % Yule-Walker system
-for iDirac = 1: nDiracs
+for iDirac = 1: nDegMax - nDiracs + 1
    tauMatrixLeft(iDirac, :) = flip(tau(iDirac: iDirac + nDiracs - 1));
    tauMatrixRight(iDirac) = -tau(iDirac + nDiracs);
 end
@@ -17,13 +17,13 @@ filterCoeffs = [1; tauMatrixLeft \ tauMatrixRight];
 % roots of z-transform of the filter corresponds to the pulse locations:
 % H(z) = (1-t0z^(-1))(1-t1z^(-1)) = 1-(t0+t1)z^(-1)+t0t1z(-2)
 % h(0)=1; h(1)=t0+t1; h(2)=t0t1
-func = @(tDelta) ([tDelta(1) * tDelta(2) - filterCoeffs(3); -(tDelta(1) + tDelta(2)) - filterCoeffs(2)]);
+func = @(loc) ([loc(1) * loc(2) - filterCoeffs(3); -(loc(1) + loc(2)) - filterCoeffs(2)]);
 % solve to get pulse locations
-tDelta = sort(fsolve(func, [1 1]));
+locationsRec = sort(fsolve(func, [1 1]));
 % Vandermonde system
-timeMatrix = fliplr(vander(tDelta))';
+locMatrix = fliplr(vander(locationsRec))';
 % weighted sum of the observed samples
 tauMatrix = tau(1: nDiracs)';
 % samples are related to locations and weights; first two terms are already
 % known, solve for weights
-ampMatrix = timeMatrix \ tauMatrix;
+weightsRec = locMatrix \ tauMatrix;
