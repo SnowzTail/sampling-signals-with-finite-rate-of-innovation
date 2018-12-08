@@ -48,7 +48,7 @@ function [Tx_RGB, Ty_RGB]= ImageRegistration
 load('PolynomialReproduction_coef.mat', 'Coef_0_0', 'Coef_1_0', 'Coef_0_1');
 
 % -------- include your code here -----------
-% initialize
+% parameters
 nSensors = 40;
 nLayers = 3;
 % noise threshold (by trials and errors)
