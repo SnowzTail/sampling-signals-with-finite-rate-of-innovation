@@ -19,7 +19,7 @@ function [SR_image] = Main_SR
 % *************************************************************************
 
 % Register images
-[Tx_RGB Ty_RGB]= ImageRegistration;
+[Tx_RGB, Ty_RGB]= ImageRegistration;
 
 % Compute super-resolved image
 [SR_image]= ImageFusion(Tx_RGB, Ty_RGB);

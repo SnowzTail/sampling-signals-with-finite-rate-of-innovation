@@ -1,10 +1,10 @@
-function [Tx_RGB Ty_RGB]= ImageRegistration
+function [Tx_RGB, Ty_RGB]= ImageRegistration
 % *************************************************************************
 % Wavelets and Applications Course - Dr. P.L. Dragotti
 % MATLAB mini-project 'Sampling Signals with Finite Rate of Innovation'
 % Exercice 6
 % *************************************************************************
-% 
+%
 % FOR STUDENTS
 %
 % This function registers the set of 40 low-resolution images
@@ -32,8 +32,8 @@ function [Tx_RGB Ty_RGB]= ImageRegistration
 % 2.The second step consists in calculating the barycenters of the Red,
 % Green and Blue layers of the low-resolution images.
 %
-% 3.By computing the difference between the barycenters of corresponding 
-% layers between two images, the horizontal and vertical shifts can be 
+% 3.By computing the difference between the barycenters of corresponding
+% layers between two images, the horizontal and vertical shifts can be
 % retrieved for each layer.
 %
 %
@@ -45,30 +45,55 @@ function [Tx_RGB Ty_RGB]= ImageRegistration
 
 
 % Load the coefficients for polynomial reproduction
-load('PolynomialReproduction_coef.mat','Coef_0_0','Coef_1_0','Coef_0_1');
+load('PolynomialReproduction_coef.mat', 'Coef_0_0', 'Coef_1_0', 'Coef_0_1');
 
 % -------- include your code here -----------
-NbSensors = 40;
-% for layer = 1:3
-for k=1:NbSensors
-    % Load images
-    LR_k= double(imread(sprintf('LR_Tiger_%.2d.tif',k)));
-    LR_k = LR_k(:,:,:)/255;
-    for layer = 1:3
-    m00 = sum(sum(Coef_0_0 .* LR_k(:, :, layer)));
-    m01 = sum(sum(Coef_0_1 .* LR_k(:, :, layer)));
-    m10 = sum(sum(Coef_1_0 .* LR_k(:, :, layer)));
-    x(layer, k) = m10/m00;
-    y(layer, k) = m01/m00;
+% initialize
+nSensors = 40;
+nLayers = 3;
+% noise threshold (by trials and errors)
+thrRed = 0.28;
+thrGreen = 0.29;
+thrBlue = 0.295;
+x = zeros(nSensors, nLayers);
+y = zeros(nSensors, nLayers);
+Tx_RGB = zeros(nSensors, nLayers);
+Ty_RGB = zeros(nSensors, nLayers);
+% load low-resolution images
+for iSensor = 1: nSensors
+    % obtain samples
+    lrSamples = double(imread(sprintf('LR_Tiger_%.2d.tif', iSensor)));
+    % rescale sample values between 0 and 1
+    lrSamples = lrSamples / 255;
+    % colour layer: 1 -> red, 2 -> green, 3 -> blue
+    for iLayer = 1: nLayers
+        % samples below noise threshold are set to zero to reduce noise
+        temp = lrSamples(:, :, iLayer);
+        % apply red layer threshold
+        if iLayer == 1
+            temp(temp < thrRed) = 0;
+            lrSamples(:, :, iLayer) = temp;
+        % apply green layer threshold
+        elseif iLayer == 2
+            temp(temp < thrGreen) = 0;
+            lrSamples(:, :, iLayer) = temp;
+        % apply blue layer threshold
+        else
+            temp(temp < thrBlue) = 0;
+            lrSamples(:, :, iLayer) = temp;
+        end
+        % compute moments
+        m_00 = sum(sum(Coef_0_0 .* lrSamples(:, :, iLayer)));
+        m_01 = sum(sum(Coef_0_1 .* lrSamples(:, :, iLayer)));
+        m_10 = sum(sum(Coef_1_0 .* lrSamples(:, :, iLayer)));
+        % barycenters
+        x(iSensor, iLayer) = m_10 / m_00;
+        y(iSensor, iLayer) = m_01 / m_00;
     end
+    % select the first figure as reference and calculate the shift of
+    % barycenters
+    Tx_RGB(iSensor, :) = x(iSensor, :) - x(1, :);
+    Ty_RGB(iSensor, :) = y(iSensor, :) - y(1, :);
 end
-for k=1:NbSensors
-    LR_k= double(imread(sprintf('LR_Tiger_%.2d.tif',k)));
-    LR_k = LR_k(:,:,:)/255;
-    Tx_RGB = x(:, k) - x(:, 1);
-    Ty_RGB = y(:, k) - y(:, 1);
 end
-
-end
-% end
 
