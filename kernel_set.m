@@ -22,8 +22,6 @@ kernel(1: length(phiT)) = phiT;
 for iShift = 0: nShifts
     % obtain all shifted phi (circular shift)
     kernelSet(iShift + 1, :) = circshift(kernel, iShift * period);
-%     % obtain all shifted phi (remove tails)
-%     kernelSet(iShift + 1, :) = [zeros(1, iShift * period), kernel(1: end - iShift * period)];
 end
 end
 
