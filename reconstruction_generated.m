@@ -51,10 +51,14 @@ tauMatrix = tau(1: nDiracs)';
 % known, solve for weights
 ampEst = (locMatrix \ tauMatrix)';
 %% Signal plot
-stem(loc, amp);
+stem(loc, amp, 'k-o');
 hold on;
-stem(locEst, ampEst);
+stem(locEst, ampEst, 'r--x');
 xlabel('Time');
 ylabel('Amplitude');
 legend('Original Diracs', 'Estimated Diracs');
 title('Reconstruction of Dirac Signal with Kernels Reproducing Polynomials');
+disp(['Exact location:      ' num2str(loc)]);
+disp(['Estimated location:  ' num2str(locEst)]);
+disp(['Exact amplitude:     ' num2str(amp)]);
+disp(['Estimated amplitude: ' num2str(ampEst)]);

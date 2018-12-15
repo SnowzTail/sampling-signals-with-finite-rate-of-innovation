@@ -14,13 +14,14 @@ nShifts = 31;
 % time of sampling points
 sampPts = 0: 1 / period : (len - 1) / period;
 %% B-splines
-% polynomials of max degree N can be reproduced by a scaling function that
-% generates wavelets with (N + 1) vanishing moments
-[phiT, ~, phiTildeT, ~, ~] = wavefun('bior4.4', iter);
+% bspline of order N can reproduce polynomials of maximum degree N
+[phiT] = bspline(period, degMax);
 % obtain kernel by shifting scaling function
 [kernelSet] = kernel_set(len, period, nShifts, phiT);
-% obtain dual-basis kernel
-[dualKernelSet] = kernel_set(len, period, nShifts, phiTildeT);
+% calculate the dual basis kernel
+[dualKernel] = dual_basis(kernelSet(1, :));
+% obtain dual basis kernel set by shifting
+[dualKernelSet] = kernel_set(len, period, nShifts, dualKernel);
 % determine polynomials and coefficients of corresponding kernels
 [poly, coefs] = polynomial_coefs(len, period, nShifts, degMax, sampPts, dualKernelSet);
 % reproduce polynomials with coefficients

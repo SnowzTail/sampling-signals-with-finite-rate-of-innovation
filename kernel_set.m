@@ -13,7 +13,7 @@ function [kernelSet] = kernel_set(len, period, nShifts, phiT)
 %
 % Comments:
 %   - the scaling function should be determined in advance
-%
+
 % Author & Date: Yang (i@snowztail.com) - 08 Dec 18
 kernel = zeros(1, len);
 kernelSet = zeros(1 + nShifts, len);
