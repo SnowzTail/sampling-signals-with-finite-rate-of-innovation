@@ -21,6 +21,8 @@ function [signal, loc, amp] = diracs(len, period, nDiracs, ampMax)
 signal = zeros(1, len);
 loc = sort(randperm(len, nDiracs)) / period;
 amp = randperm(ampMax, nDiracs);
+% loc = [8 12];
+% amp = [2 3];
 signal(loc * period) = amp;
 end
 

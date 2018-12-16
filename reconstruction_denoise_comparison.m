@@ -18,7 +18,7 @@ iter = log2(period);
 % time of sampling points
 sampPts = 0: 1 / period : (len - 1) / period;
 % standard deviation
-sigma = 1e-1;
+sigma = 1e1;
 % generate dirac signal
 [signal, loc, amp] = diracs(len, period, nDiracs, ampMax);
 % AWGN noise
@@ -54,7 +54,7 @@ end
 % filter is determined by the last column of v
 filterCoefsTls = vTls(:, end);
 % determine dirac locations by annihilating filter
-locEstTls = sort(zero(tf(filterCoefsTls', 1)))';
+locEstTls = sort(real(zero(tf(filterCoefsTls', 1))))';
 % Vandermonde system
 locMatrix = fliplr(vander(locEstTls))';
 % weighted sum of the observed samples
@@ -90,7 +90,10 @@ end
 % filter is determined by the last column of v
 filterCoefsCadzow = vCadzow(:, end);
 % determine dirac locations by annihilating filter
-locEstCadzow = sort(zero(tf(filterCoefsCadzow', 1)))';
+% filterCoefsCadzow = filterCoefsCadzow / filterCoefsCadzow(1);
+% func = @(locx) ([locx(1) * locx(2) - filterCoefsCadzow(3); -(locx(1) + locx(2)) - filterCoefsCadzow(2)]);
+% locEstCadzowR = sort(fsolve(func, [1 1]));
+locEstCadzow = sort(real(zero(tf(filterCoefsCadzow', 1))))';
 % Vandermonde system
 locMatrix = fliplr(vander(locEstCadzow))';
 % weighted sum of the observed samples
