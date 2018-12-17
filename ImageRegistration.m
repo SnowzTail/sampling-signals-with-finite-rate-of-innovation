@@ -51,7 +51,7 @@ load('PolynomialReproduction_coef.mat', 'Coef_0_0', 'Coef_1_0', 'Coef_0_1');
 % parameters
 nSensors = 40;
 nLayers = 3;
-% noise threshold (by trials and errors)
+% noise threshold (by dichotomy trials and errors)
 thrRed = 0.28;
 thrGreen = 0.29;
 thrBlue = 0.295;

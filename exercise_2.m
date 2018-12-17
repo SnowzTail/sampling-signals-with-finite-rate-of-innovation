@@ -8,19 +8,22 @@ period = 64;
 % max amplitue
 ampMax = 32;
 % number of iterations
-iter = 6;
+iter = log2(period);
 % number of shifts
 nShifts = 31;
 % time of sampling points
 sampPts = 0: 1 / period : (len - 1) / period;
-%% Daubechies
-% polynomials of max degree N can be reproduced by a scaling function that
-% generates wavelets with (N + 1) vanishing moments
-[phiT, ~, ~] = wavefun('dB4', iter);
+%% B-splines
+% bspline of order N can reproduce polynomials of maximum degree N
+[phiT] = bspline(period, degMax);
 % obtain kernel by shifting scaling function
 [kernelSet] = kernel_set(len, period, nShifts, phiT);
+% calculate the dual basis kernel
+[dualKernel] = dual_basis(kernelSet(1, :));
+% obtain dual basis kernel set by shifting
+[dualKernelSet] = kernel_set(len, period, nShifts, dualKernel);
 % determine polynomials and coefficients of corresponding kernels
-[poly, coefs] = polynomial_coefs(len, period, nShifts, degMax, sampPts, kernelSet);
+[poly, coefs] = polynomial_coefs(len, period, nShifts, degMax, sampPts, dualKernelSet);
 % reproduce polynomials with coefficients
 polyRep = coefs * kernelSet;
 figure;
@@ -33,7 +36,7 @@ for iDeg = 0: degMax
     plot(sampPts, kernelSet' .* coefs(iDeg + 1, :), 'k:')
     xlabel('Time');
     ylabel('Amplitude');
-    legend(sprintf('Original Polynomial t^%d', iDeg), 'Reproduced by dB4', 'Shifted Kernels', 'location', 'northwest');
+    legend(sprintf('Original Polynomial t^%d', iDeg), 'Reproduced by Cubic B-spline', 'Shifted Kernels', 'location', 'northwest');
     title(['Polynomial of Degree ', num2str(iDeg)]);
 end
 % suptitle(['Reproduction of polynomials of maximum degree ' nDegMax ' using Daubechies wavelets with ' nDegMax + 1 ' vanishing moments']);

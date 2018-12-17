@@ -12,7 +12,7 @@ ampMax = 32;
 % number of shifts
 nShifts = 31;
 % number of iterations
-iter = 6;
+iter = log2(period);
 % time of sampling points
 sampPts = 0: 1 / period : (len - 1) / period;
 %% Daubechies

@@ -23,8 +23,8 @@ if nOrders == 0
     phiT = boxFun;
 else
     for iOrder = 1: nOrders
-        % pad the scaling function to a degree of 2 and ensure the peak in the
-        % middle
+        % pad the scaling function to a power of 2 and ensure the peak in the
+        % centre
         if mod(iOrder, 2)
             phiT = [0 conv(boxFun, prevPhiT)] / period;
         else
